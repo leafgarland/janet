@@ -27,7 +27,8 @@ PREFIX?=/usr/local
 INCLUDEDIR?=$(PREFIX)/include
 BINDIR?=$(PREFIX)/bin
 LIBDIR?=$(PREFIX)/lib
-JANET_BUILD?="\"$(shell git log --pretty=format:'%h' -n 1 || echo local)\""
+GIT_COMMIT=$(shell git log --pretty=format:'%h' -n 1 || echo local)
+JANET_BUILD?="\"$(GIT_COMMIT)\""
 CLIBS=-lm -lpthread
 JANET_TARGET=build/janet
 JANET_LIBRARY=build/libjanet.so
@@ -37,6 +38,8 @@ MANPATH?=$(PREFIX)/share/man/man1/
 PKG_CONFIG_PATH?=$(LIBDIR)/pkgconfig
 DEBUGGER=gdb
 SONAME_SETTER=-Wl,-soname,
+DOCKER_NAME?=janet
+DOCKER_TAG?=$(GIT_COMMIT)
 
 CFLAGS:=$(CFLAGS) -std=c99 -Wall -Wextra -Isrc/include -Isrc/conf -fPIC -O2 -fvisibility=hidden
 LDFLAGS:=$(LDFLAGS) -rdynamic
@@ -219,6 +222,10 @@ build/janet-%.tar.gz: $(JANET_TARGET) \
 	mkdir -p build/$(JANET_DIST_DIR)
 	cp -r $^ build/$(JANET_DIST_DIR)/
 	cd build && tar -czvf ../$@ $(JANET_DIST_DIR)
+
+docker:
+	docker build . -f .docker/Dockerfile --target=dev --tag $(DOCKER_NAME):dev-$(DOCKER_TAG)
+	docker build . -f .docker/Dockerfile --target=core --tag $(DOCKER_NAME):$(DOCKER_TAG)
 
 #########################
 ##### Documentation #####
