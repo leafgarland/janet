@@ -2,6 +2,8 @@ name: Build and publish Janet docker images
 
 on:
   push:
+    branches:
+    - master
     tags:
     - '*'
 
@@ -17,7 +19,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: .docker/Dockerfile
           repository: leafgarland/janet
-          tags: latest
           tag_with_ref: true
           add_git_labels: true
       - uses: docker/build-push-action@v1
@@ -27,7 +28,6 @@ jobs:
           dockerfile: .docker/Dockerfile
           repository: leafgarland/janet-sdk
           target: dev
-          tags: latest
           tag_with_ref: true
           add_git_labels: true
 
